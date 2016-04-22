@@ -14,12 +14,6 @@
         <color rgba="0 1 0 1" />
       </material>
     </visual>
-    <collision group="base_link_c">
-      <origin xyz="0 0 2.2" rpy="0 0 0" />
-      <geometry>
-        <box size=".2 .2 .2" />
-      </geometry>
-    </collision>
   </link>
 
   <link name="upper_arm">
@@ -37,12 +31,6 @@
 	    <color rgba="1 0 0 1" />
       </material>
     </visual>
-    <collision group="upper_arm_c">
-      <origin xyz="0 0 -.5" rpy="0 0 0"/>
-      <geometry>
-        <capsule length="1.1" radius=".05" />
-      </geometry>
-    </collision>
   </link>
 
   <link name="lower_arm">
@@ -60,12 +48,6 @@
 	    <color rgba="0 0 1 1" />
       </material>
     </visual>
-    <collision group="lower_arm_c">
-      <origin xyz="0 0 -.5" rpy="0 0 0"/>
-      <geometry>
-        <capsule length="1.1" radius=".05" />
-      </geometry>
-    </collision>
   </link>
 
   <link name="hand">
@@ -83,12 +65,54 @@
 	    <color rgba="0 1 0 1" />
       </material>
     </visual>
-    <collision group="hand_c">
-      <origin xyz="0 0 0" rpy="0 0 0" />
+
+    <visual>
       <geometry>
-         <box size="0.5 0 0.1"/>
+        <sphere radius="0.03"/>
       </geometry>
+      <origin xyz=".1 0 -0.05"/>
+      <material name="black">
+	    <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.1 0 -0.05"/>
+      <material name="black">
+	    <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="0 0 -0.05"/>
+      <material name="black">
+	    <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+
+    <collision group="hand_c">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".1 0 -0.05"/>
     </collision>
+    <collision group="hand_c">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.1 0 -0.05"/>
+    </collision>
+    <collision group="hand_c">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="0 0 -0.05"/>
+    </collision>
+
   </link>
 
   <link name="l_base_finger">
@@ -106,12 +130,39 @@
 	    <color rgba="0 0 1 1" />
       </material>
     </visual>
-    <collision group="l_base_finger_c">
-       <origin xyz="0 0 -0.125" rpy="0 0 0" />
+
+    <visual>
       <geometry>
-         <capsule length="0.35" radius=".05" />
+        <sphere radius="0.03"/>
       </geometry>
+      <origin xyz=".05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-0.05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
+    </visual>
+
+    <collision group="finger_base_i">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".05 0 -0.125"/>
     </collision>
+    <collision group="finger_base_o">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.05 0 -0.125"/>
+    </collision>
+
   </link>
 
   <link name="r_base_finger">
@@ -128,18 +179,51 @@
       <material name="blue">
 	    <color rgba="0 0 1 1" />
       </material>
-    </visual>    
-    <collision group="r_base_finger_c">
-       <origin xyz="0 0 -0.125" rpy="0 0 0" />
+    </visual>
+
+    <visual>
       <geometry>
-         <capsule length="0.35" radius=".05" />
+        <sphere radius="0.03"/>
       </geometry>
+      <origin xyz=".05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-0.05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
+    </visual>
+
+    <collision group="finger_base_i">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
     </collision>
+    <collision group="finger_base_o">
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.05 0 -0.125"/>
+      <material name="black">
+	<color rgba="0 0 0 1" />
+      </material>
+    </collision>
+    
   </link>
 
   <link name="l_tip_finger">
     <inertial>
-      <origin xyz="0 0 -0.125" rpy="0 0 0" />
+      <origin xyz="0 0 -0.05" rpy="0 0 0" />
       <mass value="0.1" />
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
     </inertial>
@@ -152,17 +236,23 @@
 	    <color rgba="1 0 0 1" />
       </material>
     </visual>
-    <collision group="l_tip_finger_c">
-       <origin xyz="0 0 -0.125" rpy="0 0 0" />
+    <collision group="inside_finger_tip">
+      <origin rpy="0 0 0" xyz="0.025 0 0.35"/>
       <geometry>
-         <capsule length="0.35" radius=".05" />
+        <sphere radius="0.0"/>
+      </geometry>
+    </collision>
+    <collision group="outside_finger_tip">
+      <origin rpy="0 0 0" xyz="-0.025 0 0.35"/>
+      <geometry>
+        <sphere radius="0.0"/>
       </geometry>
     </collision>
   </link>
 
  <link name="r_tip_finger">
     <inertial>
-      <origin xyz="0 0 -0.125" rpy="0 0 0" />
+      <origin xyz="0 0 -0." rpy="0 0 0" />
       <mass value="0.1" />
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
     </inertial>
@@ -175,10 +265,16 @@
 	    <color rgba="1 0 0 1" />
       </material>
     </visual>
-    <collision group="r_tip_finger_c">
-       <origin xyz="0 0 -0.125" rpy="0 0 0" />
+    <collision group="inside_finger_tip">
+      <origin rpy="0 0 0" xyz="-0.025 0 0.35"/>
       <geometry>
-         <capsule length="0.35" radius=".05" />
+        <sphere radius="0.0"/>
+      </geometry>
+    </collision>
+    <collision group="outside_finger_tip">
+      <origin rpy="0 0 0" xyz="0.025 0 0.35"/>
+      <geometry>
+        <sphere radius="0.0"/>
       </geometry>
     </collision>
   </link>

@@ -1,14 +1,12 @@
 function runSwingUpWithTerrain()
-    % create the terrain
-    options.view = 'right';
-    %terrain_height = -4;
-    options.terrain = RigidBodyFlatTerrain();
-    % construct the combined plant
-    plant = PlanarRigidBodyManipulator('PlanarManipulator.urdf',options);
+    % construct the plant
+    plant = PlanarRigidBodyManipulator('PlanarManipulator.urdf');
     plant = plant.setInputLimits(-40,40);
+    % add terrain
+    plant = addTerrain(plant)
     % construct the visualizer
     v = plant.constructVisualizer();
-    v.axis = 7*[-1 1 -1 1];
+    v.axis = 5*[-1 1 -1 1];
     %v.inspector();
     
     % set start and end points
@@ -36,7 +34,7 @@ function runSwingUpWithTerrain()
     %}
     
     % create the contact implicit trajectory object with relaxation options
-    prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6],options);
+    prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6]);
     % add the start and end state
     prog = prog.addStateConstraint(ConstantConstraint(x0),1);
     prog = prog.addStateConstraint(ConstantConstraint(xf),N);
@@ -103,6 +101,25 @@ function runSwingUpWithTerrain()
         utraj = utraj;
         %xtraj_noise = awgn(HOW_DO_YOU_GET_THE_POINTS,10,'measured');
         %utraj_noise = awgn(HOW_DO_YOU_GET_THE_POINTS,10,'measured');
+    end
+
+    function [plant] = addCubeObsacle(plant,edgeLength,xyz,rpy)
+        if nargin < 4
+            rpy = [0; 0; 0];
+            if nargin < 3
+                xyz = [0; 0; 0;];
+                if nargin < 2            
+                    edgeLength = [1; 1; 1];
+                end
+            end
+        end
+        cube = RigidBodyBox(edgeLength, xyz, rpy);
+        plant = plant.addGeometryToBody('world', cube);
+        plant = plant.compile();
+    end
+
+    function [plant] = addTerrain(plant)
+        plant = plant.addRobotFromURDF('PlanarManipulatorTerrain.urdf');
     end
 
     % playback the trajectory
