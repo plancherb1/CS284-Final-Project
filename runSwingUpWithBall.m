@@ -10,8 +10,8 @@ function runSwingUpWithBall()
     % construct the visualizer
     v = plant.constructVisualizer();
     v.axis = 5*[-1 1 -1 1];
-    v.inspector();
-    return;
+    %v.inspector();
+    %return;
     
     % set start and end points
     manipulator_state_0 = [-pi/2;0;0;0;0;0];
