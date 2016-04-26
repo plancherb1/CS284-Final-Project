@@ -1,23 +1,33 @@
-function runSwingUp()
-    % construct the plant
-    plant = PlanarRigidBodyManipulator('PlanarManipulator.urdf');
+function runSwingUpBallTest()
+    % construct the plant with terrain and ball
+    options.view = 'right';
+    terrainHeight = -2.1;
+    options.terrain = RigidBodyFlatTerrain(terrainHeight);
+    plant = PlanarRigidBodyManipulator('TestPlant.urdf',options);
+    plant = plant.addRobotFromURDF('ball.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
     plant = plant.setInputLimits(-40,40);
+    plant = plant.compile();
     % construct the visualizer
     v = plant.constructVisualizer();
     v.axis = 5*[-1 1 -1 1];
     %v.inspector();
+    %return;
     
     % set start and end points
-    manipulator_state_0 = [-pi/2;0;0;0;0;0];
-    manipulator_state_f = [pi;0;0;0;0;0];
-    manipulator_vel_0 = zeros(6,1);
-    manipulator_vel_f = zeros(6,1);
-    x0 = [manipulator_state_0;manipulator_vel_0];
-    xf = [manipulator_state_f;manipulator_vel_f];
+    manipulator_state_0 = [-pi/2;0];
+    manipulator_state_f = [pi;0];
+    manipulator_vel_0 = zeros(2,1);
+    manipulator_vel_f = zeros(2,1);
+    ball_state_0 = [-4;0;0];
+    ball_state_f = [-4;-2;0];
+    ball_vel_0 = [0;0;0];
+    ball_vel_f = [0;0;0];
+    x0 = [manipulator_state_0;ball_state_0;manipulator_vel_0;ball_vel_0];
+    xf = [manipulator_state_f;ball_state_f;manipulator_vel_f;ball_vel_f];
     
     % timespan and number of colocation points
     tf0 = 4;
-    N = 50;
+    N = 40;
     
     % create the contact implicit trajectory object
     prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6]);
@@ -43,12 +53,12 @@ function runSwingUp()
         % if done break
         if info==1, break; end
         % else improve the guess
-        [traj_init.x, traj_init.u] = improveGuess(xtraj,utraj);
+        [traj_init] = improveGuess(xtraj,utraj,ltraj,ljltraj);
         v.playback(xtraj);
     end
 
     function [g,dg] = cost(dt,x,u)
-        R = 10*eye(6);
+        R = 10*eye(2);
         g = u'*R*u;
         dg = [zeros(1,1+size(x,1)),2*u'*R];
     end
@@ -61,12 +71,14 @@ function runSwingUp()
 
     function [xtraj] = initTraj(x0,xf,tf0,N)
         % create reasonable middle states
-        manipulator_state_m = [-1;pi/2;pi/2;-pi/2;-pi/2;pi/2];
-        manipulator_state_m2 = [1;pi/2;pi/2;-pi/2;-pi/2;pi/2];
-        manipulator_vel_m = [5;10;0;0;0;0];
-        manipulator_vel_m2 = [5;0;0;0;0;0];
-        xm = [manipulator_state_m;manipulator_vel_m];
-        xm2 = [manipulator_state_m2;manipulator_vel_m2];
+        manipulator_state_m = [-1;pi/2];
+        manipulator_state_m2 = [1;pi/2];
+        manipulator_vel_m = [5;10];
+        manipulator_vel_m2 = [5;0];
+        ball_state_m = [-4;-2;0];
+        ball_vel_m = [0;0;0];
+        xm = [manipulator_state_m;ball_state_m;manipulator_vel_m;ball_vel_m];
+        xm2 = [manipulator_state_m2;ball_state_m;manipulator_vel_m2;ball_vel_m];
         
         % split the positions into three parts from x0 to xm
         N1 = floor(N/3);
@@ -82,16 +94,18 @@ function runSwingUp()
         xtraj = PPTrajectory(foh(linspace(0,tf0,N),[xvec1 xvec2 xvec3]));          
     end
     
-    function [xtraj,utraj] = improveGuess(xtraj,utraj)
-        xtraj = xtraj;
-        utraj = utraj;
+    function [traj_init] = improveGuess(xtraj,utraj,ltraj,ljltraj)
+        traj_init.x = xtraj;
+        traj_init.u = utraj;
+        traj_init.l = ltraj;
+        traj_init.ljl = ljltraj;
         %xtraj_noise = awgn(HOW_DO_YOU_GET_THE_POINTS,10,'measured');
         %utraj_noise = awgn(HOW_DO_YOU_GET_THE_POINTS,10,'measured');
     end
 
     % playback the trajectory
     %v.playback(xtraj,struct('slider',true));
-    v.playbackAVI(xtraj,'~/Desktop/swingUp.avi');
+    v.playbackAVI(xtraj,'~/Desktop/ballTest.avi');
     % for simulation need to wrap the plant in a TimeStepping to get contacts
     % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
     % to get dynamics at a point use the manipulatorDynamics

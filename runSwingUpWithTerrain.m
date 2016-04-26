@@ -1,6 +1,9 @@
-function runSwingUp()
-    % construct the plant
-    plant = PlanarRigidBodyManipulator('PlanarManipulator.urdf');
+function runSwingUpWithTerrain()
+    % construct the plant with terrain
+    options.view = 'right';
+    terrainHeight = -2.5;
+    options.terrain = RigidBodyFlatTerrain(terrainHeight);
+    plant = PlanarRigidBodyManipulator('PlanarManipulator.urdf',options);
     plant = plant.setInputLimits(-40,40);
     % construct the visualizer
     v = plant.constructVisualizer();
@@ -17,10 +20,18 @@ function runSwingUp()
     
     % timespan and number of colocation points
     tf0 = 4;
-    N = 50;
+    N = 20;
+    
+    % add in relaxation options and iterations limits
+    options.MinorFeasibilityTolerance = 1e-3;
+    options.MajorFeasibilityTolerance = 1e-3;
+    options.MajorOptimalityTolerance = 5e-4;
+    options.MajorIterationsLimit = 1000;
+    options.IterationsLimit = 1000000;
+    options.SuperbasicsLimit= 10000;
     
     % create the contact implicit trajectory object
-    prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6]);
+    prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6],options);
     % add the start and end state
     prog = prog.addStateConstraint(ConstantConstraint(x0),1);
     prog = prog.addStateConstraint(ConstantConstraint(xf),N);
@@ -91,7 +102,7 @@ function runSwingUp()
 
     % playback the trajectory
     %v.playback(xtraj,struct('slider',true));
-    v.playbackAVI(xtraj,'~/Desktop/swingUp.avi');
+    v.playbackAVI(xtraj,'~/Desktop/swingUpTerrain.avi');
     % for simulation need to wrap the plant in a TimeStepping to get contacts
     % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
     % to get dynamics at a point use the manipulatorDynamics

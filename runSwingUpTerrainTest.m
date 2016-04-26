@@ -21,7 +21,7 @@ function runSwingUpTerrainTest()
     
     % timespan and number of colocation points
     tf0 = 4;
-    N = 31;
+    N = 40;
     
     % create the contact implicit trajectory object
     prog = ContactImplicitTrajectoryOptimization(plant,N,[2 6]);
@@ -94,7 +94,8 @@ function runSwingUpTerrainTest()
     end
 
     % playback the trajectory
-    v.playback(xtraj,struct('slider',true));
+    %v.playback(xtraj,struct('slider',true));
+    v.playbackAVI(xtraj,'~/Desktop/terrainTest.swf');
     
     % for simulation need to wrap the plant in a TimeStepping to get contacts
     % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
