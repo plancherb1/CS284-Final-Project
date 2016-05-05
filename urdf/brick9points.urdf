@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<robot xmlns="http://drake.mit.edu"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://drake.mit.edu ../../../doc/drakeURDF.xsd" name="PlanarManipulatorStand">
+  <link name="brick">
+    <visual>
+      <geometry>
+        <box size="0.10 0 0.10"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </inertial>
+
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".05 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.05 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="0 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".05 0 0" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.05 0 0" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz=".05 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="-.05 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin xyz="0 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz=".05 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz="-.05 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz="0 0 -.05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz=".05 0 0" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz="-.05 0 0" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz=".05 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz="-.05 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+    <collision>
+      <geometry>
+        <sphere radius="0"/>
+      </geometry>
+      <origin xyz="0 0 .05" rpy="0 0 0"/>
+      <material name="red">
+	    <color rgba="1 0 0 1" />
+      </material>
+    </collision>
+
+  </link>
+</robot>

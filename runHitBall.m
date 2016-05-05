@@ -1,25 +1,23 @@
-function runSwingUp()
+function runHitBall()
     % construct the plant with terrain
     options.view = 'right';
     terrainHeight = -2;
-    %options.terrain = RigidBodyFlatTerrain(terrainHeight);
-    PRBMplant = PlanarRigidBodyManipulator('urdf/TestPlant3.urdf',options);
-    joint_limits = BoundingBoxConstraint(PRBMplant.joint_limit_min,PRBMplant.joint_limit_max);
-    joint_limit_size = size(PRBMplant.joint_limit_min,1);
+    options.terrain = RigidBodyFlatTerrain(terrainHeight);
+    plant = PlanarRigidBodyManipulator('urdf/TestPlant3.urdf',options);
     % add the ball
-    %plant = plant.addRobotFromURDF('urdf/brick4points.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
-    %plant = plant.compile();
+    plant = plant.addRobotFromURDF('urdf/brick4points.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
+    plant = plant.compile();
     % construct the visualizer
-    v = PRBMplant.constructVisualizer();
+    v = plant.constructVisualizer();
     v.axis = 5*[-1 1 -1 1];
     %v.inspector();
     %return;
     
     % now wrap it in a time stepping rigid body manipulator to include
     % contacts in the model and set input limits
-    dt = 0.005;
+    dt = 0.001;
     %options.multiple_contacts = true;
-    plant = TimeSteppingRigidBodyManipulator(PRBMplant,dt,options);
+    plant = TimeSteppingRigidBodyManipulator(plant,dt,options);
     plant = plant.setInputLimits(-40,40);
     
     % total timespan and number of colocation points
@@ -71,17 +69,24 @@ function runSwingUp()
         manipulator_state_f = [pi;0];
         manipulator_vel_0 = [0;0];
         manipulator_vel_f = [0;0];
+        brick_state_0 = [0;-1.5;0];
+        brick_state_f = [-2;-1.9;0];
+        brick_vel_0 = [0;0;0];
+        brick_vel_f = [-5;0;0];
+        x0 = [manipulator_state_0;brick_state_0;manipulator_vel_0;brick_vel_0];
+        xf = [manipulator_state_f;brick_state_f;manipulator_vel_f;brick_vel_f];
         
         % create reasonable middle states
         manipulator_state_m = [-0.2;-0.8];
         manipulator_state_m2 = [0.2;0.8];
         manipulator_vel_m = [5;10];
         manipulator_vel_m2 = [5;10];
-        
-        x0 = [manipulator_state_0;manipulator_vel_0];
-        xm = [manipulator_state_m;manipulator_vel_m];
-        xm2 = [manipulator_state_m2;manipulator_vel_m2];
-        xf = [manipulator_state_f;manipulator_vel_f];
+        brick_state_m = [0;-1.9;0];
+        brick_state_m2 = [-1;-1.9;0];
+        brick_vel_m = [0;0;0];
+        brick_vel_m2 = [-2;0;-1];
+        xm = [manipulator_state_m;brick_state_m;manipulator_vel_m;brick_vel_m];
+        xm2 = [manipulator_state_m2;brick_state_m2;manipulator_vel_m2;brick_vel_m2];
         
         % split the positions into three parts from x0 to xm
         N1 = floor(N/3);
@@ -109,7 +114,7 @@ function runSwingUp()
     % runnign cost
     function [g,dg] = cost(dt,x,u)
         % short circuit and just use the effort
-        R = 10*eye(2);
+        R = eye(2);
         g = u'*R*u;
         dgdt = 0;
         dgdx = zeros(1,size(x,1));
@@ -119,15 +124,13 @@ function runSwingUp()
 
     % final cost
     function [h,dh] = finalCost(t,x)
-        q = x(1:2);
-        kinsol = plant.doKinematics(q);
-        hand_body = 3;
-        pos_on_hand_body = [0;-1.1];
-        [hand_pos,dHand_pos] = plant.forwardKin(kinsol,hand_body,pos_on_hand_body);
-        % then reward for a higher hand position by reducing final cost by a huge
-        % factor cause why not make it huge!
-        h = -1000*hand_pos(2);
-        dh = -1000*[0,dHand_pos(2,:),0,0];
+        % short circuit just position in x of ball
+        Qf = 500;
+        h = Qf*x(3);
+        dhdt = 0;
+        dhdq = [0,0,Qf,0,0];
+        dhdqd = zeros(1,5);
+        dh = [dhdt,dhdq,dhdqd];
     end
 
     % compute the trajectory optimization problem
@@ -167,16 +170,17 @@ function runSwingUp()
         
         % add the start and end state
         prog = prog.addStateConstraint(ConstantConstraint(x0),1);
-        prog = prog.addStateConstraint(ConstantConstraint(xf),N);
+        %prog = prog.addStateConstraint(ConstantConstraint(xf),N);
         
         % add the running and final cost functions
         prog = prog.addRunningCost(@cost);
-        %prog = prog.addFinalCost(@finalCost);
+        prog = prog.addFinalCost(@finalCost);
         
-        % add in the joint limit constraints     
-        % prog = prog.addStateConstraint(joint_limits,[1:N],[1:joint_limit_size]);
+        % add in the joint limit constraints
+        % joint_limits = BoundingBoxConstraint(plant.joint_limit_min,plant.joint_limit_max);
+        % prog = prog.addStateConstraint(joint_limits,[1:N],[1:size(plant.joint_limit_min,1)]);
         
         % add in the input constraints
-        %prog = prog.addInputConstrain(BoundingBoxConstraint([-40;-40],[40;40]),[1:N],[1:2]);
+        %prog = prog.addOmputConstrain(BoundingBoxConstraint([-40;-40],[40;40]),[1:N],[1:2]);
     end
 end
