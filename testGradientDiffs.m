@@ -1,25 +1,65 @@
 function testGradientDiffs()
-    PRBM = PlanarRigidBodyManipulator('../acrobot/acrobot.urdf');
+    % Get plants
+    PRBM = PlanarRigidBodyManipulator('urdf/acrobotTest.urdf');
     dt = 0.0001;
     TSRBM = TimeSteppingRigidBodyManipulator(PRBM,dt);
-    x = 5 * rand(PRBM.num_positions+PRBM.num_velocities,1);
-    u = 5 * rand(nnz(PRBM.B),1);
-    [Pxdot,Pdxdot] = PRBM.dynamics(0,x,u)
-    [Txdot, Tdxdot] = TSRBM.update(0,x,u)
-    norm(Pxdot - Txdot)
-    norm(Pdxdot - Tdxdot)
-end
+    
+    % Get rand x,u
+    nX = PRBM.getNumStates();
+    nU = nnz(PRBM.B);
+    x0 = 5 * rand(nX,1);
+    u0 = 5 * rand(nU,1);
+    x1 = 5 * rand(nX,1);
+    u1 = 5 * rand(nU,1);
 
-    %{
-    x = [0;0;0;0];
-    u = 5;
-    TSRBM1 = TimeSteppingRigidBodyManipulator(PRBM,1);
-    [Txdot1, Tdxdot1] = TSRBM1.update(0,x,u);
-    Txdotf = [Txdot(1:2);Txdot1(3:4)];
-    Tdxdotf = [zeros(size(x,1)/2,size(Tdxdot,2));Tdxdot1(size(x,1)/2+1:end,:)] - Tdxdot;
-    toFlip = Tdxdotf(1:size(x,1)/2,2:size(x,1)+1);
-    toFlip = -1 * [toFlip(:,size(toFlip,2)/2+1:end),toFlip(:,1:size(toFlip,2)/2)];
-    Tdxdotf(1:size(x,1)/2,2:size(x,1)+1) = toFlip;
-    norm(Pxdot - Txdotf)
-    norm(Pdxdot - Tdxdotf)
-    %}
+    % TEST FORWARD_EULER (1) vs MIDPOINT (2) vs INTEGRATED_FORWARD_EULER (3) %
+    test = 3;
+    
+    % get next step and compute error
+    if test == 1
+        h = dt;
+        [xdot,dxdot] = PRBM.dynamics(0,x0,u0);
+        fP = x1 - x0 - h*xdot;
+        dfP = [-xdot (-eye(nX) - h*dxdot(:,2:1+nX)) eye(nX) -h*dxdot(:,nX+2:end)];
+        
+        [xk, xkdot] = TSRBM.update(0,x0,u0);
+        fT = x1 - x0 - (xk - x0);
+        dfT = [-(xk - x0)/dt -xkdot(:,2:1+nX) eye(nX) -xkdot(:,nX+2:end)];
+    end
+    if test == 2
+        h = dt;
+        [xdot,dxdot] = PRBM.dynamics(0,.5*(x0+x1),.5*(u0+u1));
+        fP = x1 - x0 - h*xdot;
+        dfP = [-xdot (-eye(nX) - h*dxdot(:,2:1+nX)) eye(nX) -h*dxdot(:,nX+2:end)];
+    
+        [xk, xkdot] = TSRBM.update(0,.5*(x0+x1),.5*(u0+u1));
+        fT = x1 - x0 - (xk - .5*(x0+x1));
+        dfT = [-(xk - .5*(x0+x1))/dt -xkdot(:,2:1+nX) eye(nX) -xkdot(:,nX+2:end)];
+    end
+    if test == 3
+        h = 0.01;
+        [xdot,dxdot] = PRBM.dynamics(0,x0,u0);
+        fP = x1 - x0 - h*xdot;
+        dfP = [-xdot (-eye(nX) - h*dxdot(:,2:1+nX)) eye(nX) -h*dxdot(:,nX+2:end)];
+        
+        steps = h/dt;
+        xc = x0;
+        for attempts=1:steps
+            [xk, xkdot] = TSRBM.update(0,xc,u0);
+            try
+                dfT(:,2:1+nX) = dfT(:,2:1+nX) * -xkdot(:,2:1+nX); % SOLVE THIS!!!!!
+                dfT(:,end-size(-xkdot(:,nX+2:end),2)+1:end) = dfT(:,end-size(-xkdot(:,nX+2:end),2)+1:end) +  -xkdot(:,nX+2:end);
+            catch
+                dfT = [-(xk - xc)/dt -xkdot(:,2:1+nX) eye(nX) -xkdot(:,nX+2:end)];
+            end
+            xc = xk;
+        end
+        fT = x1 - x0 - (xk - x0);
+        %dfT(:,2:1+nX) = dfT(:,2:1+nX) ./ steps;
+    end
+    
+    fP - fT
+    dfP - dfT
+    dfP
+    dfT
+end

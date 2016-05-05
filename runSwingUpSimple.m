@@ -1,36 +1,32 @@
 function runSwingUpSimple()
     % construct the plant
     options.view = 'right';
-    PRBMplant = PlanarRigidBodyManipulator('urdf/AcrobotTest.urdf',options);
+    plant = PlanarRigidBodyManipulator('urdf/AcrobotTest.urdf',options);
+    plant = plant.setInputLimits(-40,40);
     % construct the visualizer
-    v = PRBMplant.constructVisualizer();
+    v = plant.constructVisualizer();
     v.axis = 5*[-1 1 -1 1];
     %v.inspector();
     %return;
     
-    % now wrap it in a time stepping rigid body manipulator to include
-    % contacts in the model and set input limits
-    dt = 0.1;
-    plant = TimeSteppingRigidBodyManipulator(PRBMplant,dt,options);
-    plant = plant.setInputLimits(-40,40);
-    
     % total timespan and number of colocation points
-    T = 4;
-    N = T/dt;
+    tmin = 2;
+    tmax = 6;
+    tf0 = (tmin+tmax)/2;
+    N = 30;
     
     % initialize the trajectory
-    [x0,xf,traj_init.x] = initTraj(T,N);
-    
+    [x0,xf,traj_init.x] = initTraj(tf0,N);
     
     % compute the problem to solve
     %options.time_option = 1;
-    options.MinorFeasibilityTolerance = 1e-3;
+    options.MinorFeasibilityTolerance = 1e-5;
     options.MajorFeasibilityTolerance = 5e-4;
     options.MajorOptimalityTolerance = 5e-4;
     options.MajorIterationsLimit = 10000;
     options.IterationsLimit = 10000000;
     options.SuperbasicsLimit= 100000;
-    prog = DirtranTrajectoryOptimization(plant,N,[T-T/2 T+T/2],options);
+    prog = DirtranTrajectoryOptimization(plant,N,[tmin tmax],options);
     prog = prog.addStateConstraint(ConstantConstraint(x0),1);
     prog = prog.addStateConstraint(ConstantConstraint(xf),N);
     prog = prog.addRunningCost(@cost);
@@ -43,7 +39,7 @@ function runSwingUpSimple()
         
         % solve
         tic
-        [xtraj,utraj,z,F,info] = prog.solveTraj(T,traj_init);
+        [xtraj,utraj,z,F,info] = prog.solveTraj(tf0,traj_init);
         toc
         
         % if done break
@@ -74,10 +70,10 @@ function runSwingUpSimple()
         manipulator_vel_f = [0;0];
         
         % create reasonable middle states
-        manipulator_state_m = [-0.2;-0.8];
-        manipulator_state_m2 = [0.2;0.8];
-        manipulator_vel_m = [5;10];
-        manipulator_vel_m2 = [5;10];
+        manipulator_state_m = [-1;0];
+        manipulator_state_m2 = [1/4;0];
+        manipulator_vel_m = [5;0];
+        manipulator_vel_m2 = [5;0];
         
         x0 = [manipulator_state_0;manipulator_vel_0];
         xm = [manipulator_state_m;manipulator_vel_m];
@@ -110,7 +106,7 @@ function runSwingUpSimple()
 
     % final cost
     function [h,dh] = finalCost(t,x)
-        h = t;
+        h = 10*t;
         dh = [1,zeros(1,size(x,1))];
     end
 end
