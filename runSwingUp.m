@@ -3,7 +3,7 @@ function runSwingUp()
     options.view = 'right';
     terrainHeight = -2;
     %options.terrain = RigidBodyFlatTerrain(terrainHeight);
-    PRBMplant = PlanarRigidBodyManipulator('urdf/TestPlant3.urdf',options);
+    PRBMplant = PlanarRigidBodyManipulator('urdf/AcrobotTest.urdf',options);
     joint_limits = BoundingBoxConstraint(PRBMplant.joint_limit_min,PRBMplant.joint_limit_max);
     joint_limit_size = size(PRBMplant.joint_limit_min,1);
     % add the ball
@@ -17,13 +17,13 @@ function runSwingUp()
     
     % now wrap it in a time stepping rigid body manipulator to include
     % contacts in the model and set input limits
-    dt = 0.005;
+    dt = 0.01;
     %options.multiple_contacts = true;
     plant = TimeSteppingRigidBodyManipulator(PRBMplant,dt,options);
     plant = plant.setInputLimits(-40,40);
     
     % total timespan and number of colocation points
-    T = 1;
+    T = 2;
     N = T/dt;
     
     % initialize the trajectory
@@ -109,7 +109,7 @@ function runSwingUp()
     % runnign cost
     function [g,dg] = cost(dt,x,u)
         % short circuit and just use the effort
-        R = 10*eye(2);
+        R = 10*eye(size(u,1));
         g = u'*R*u;
         dgdt = 0;
         dgdx = zeros(1,size(x,1));
@@ -119,6 +119,10 @@ function runSwingUp()
 
     % final cost
     function [h,dh] = finalCost(t,x)
+        h = t;
+        dh = [1,zeros(1,size(x,1))];
+        return
+        
         q = x(1:2);
         kinsol = plant.doKinematics(q);
         hand_body = 3;
@@ -134,6 +138,7 @@ function runSwingUp()
     function [prog] = computeProblem(plant,x0,xf,N,T,i,options)
         % add in relaxation options and iterations limits start with a lot
         % of slack and then reduce it over the iterations
+        %{
         switch(i)
             case 1
                 minor = 1;
@@ -161,6 +166,7 @@ function runSwingUp()
         options.IterationsLimit = 10000000;
         options.SuperbasicsLimit= 100000;
         options.time_option = 1;
+        %}
         
         % create the trajectory optimization object
         prog = DirtranTrajectoryOptimization(plant,N,[T T],options);
@@ -171,7 +177,7 @@ function runSwingUp()
         
         % add the running and final cost functions
         prog = prog.addRunningCost(@cost);
-        %prog = prog.addFinalCost(@finalCost);
+        prog = prog.addFinalCost(@finalCost);
         
         % add in the joint limit constraints     
         % prog = prog.addStateConstraint(joint_limits,[1:N],[1:joint_limit_size]);
