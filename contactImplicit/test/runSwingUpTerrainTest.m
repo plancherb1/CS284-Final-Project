@@ -3,7 +3,7 @@ function runSwingUpTerrainTest()
     options.view = 'right';
     terrainHeight = -2;
     options.terrain = RigidBodyFlatTerrain(terrainHeight);
-    plant = PlanarRigidBodyManipulator('../urdf/TestPlant.urdf',options);
+    plant = PlanarRigidBodyManipulator('../../urdf/TestPlantBoxHand.urdf',options);
     plant = plant.setInputLimits(-40,40);
     % construct the visualizer
     v = plant.constructVisualizer();
@@ -97,8 +97,4 @@ function runSwingUpTerrainTest()
     %v.playback(xtraj,struct('slider',true));
     v.playbackAVI(xtraj,'~/Desktop/terrainTest.swf');
     
-    % for simulation need to wrap the plant in a TimeStepping to get contacts
-    % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
-    % to get dynamics at a point use the manipulatorDynamics
-    % [H,C,B] = plant.manipulatorDynamics(q,qd);
 end

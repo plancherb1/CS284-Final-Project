@@ -3,9 +3,9 @@ function runLiftBall()
     options.view = 'right';
     terrainHeight = -2.4;
     %options.terrain = RigidBodyFlatTerrain(terrainHeight);
-    plant = PlanarRigidBodyManipulator('urdf/TestPlant3.urdf',options);
+    plant = PlanarRigidBodyManipulator('../urdf/TwoLinkMinimalCollisions.urdf',options);
     % add the ball
-    plant = plant.addRobotFromURDF('urdf/brick9points.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
+    plant = plant.addRobotFromURDF('../urdf/brick9points.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
     plant = plant.setInputLimits(-40,40);
     plant = plant.compile();
     % construct the visualizer

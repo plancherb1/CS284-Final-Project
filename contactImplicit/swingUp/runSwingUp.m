@@ -1,6 +1,6 @@
 function runSwingUp()
     % construct the plant
-    plant = PlanarRigidBodyManipulator('../PlanarManipulator.urdf');
+    plant = PlanarRigidBodyManipulator('../../urdf/PlanarManipulator.urdf');
     plant = plant.setInputLimits(-40,40);
     % construct the visualizer
     v = plant.constructVisualizer();
@@ -92,8 +92,5 @@ function runSwingUp()
     % playback the trajectory
     %v.playback(xtraj,struct('slider',true));
     v.playbackAVI(xtraj,'~/Desktop/swingUp.avi');
-    % for simulation need to wrap the plant in a TimeStepping to get contacts
-    % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
-    % to get dynamics at a point use the manipulatorDynamics
-    % [H,C,B] = plant.manipulatorDynamics(q,qd);
+
 end

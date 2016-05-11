@@ -1,0 +1,19 @@
+    %{
+    TSRBM = TimeSteppingRigidBodyManipulator(plant,0.0001,options);
+    TSRBM = TSRBM.setInputLimits(-40,40);
+    x0 = [-0.0125;-0.0500;5.0000;10.0000];
+    x1 = [0;0;5;10];
+    u = [-0.0131;-0.0074];
+    xc = x0;
+    steps = 100;
+    for attempts=1:steps
+        [xk, xkdot] = TSRBM.update(0,xc,u);
+        try
+            df(:,2:1+nX) = df(:,2:1+nX) + -xkdot(:,2:1+nX);
+            df(:,end-size(-xkdot(:,nX+2:end),2)+1:end) = df(:,end-size(-xkdot(:,nX+2:end),2)+1:end) +  -xkdot(:,nX+2:end);
+        catch
+            df = [-(xk - xc)/dt -xkdot(:,2:1+nX) eye(nX) -xkdot(:,nX+2:end)];
+        end
+        xc = xk;
+    end
+    %}

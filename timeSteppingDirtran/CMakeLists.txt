@@ -1,0 +1,3 @@
+add_matlab_test(NAME examples/CS284_Final_Project/dirtranConditionTSRBM COMMAND dirtranConditionTSRBM)
+add_matlab_test(NAME examples/CS284_Final_Project/DirtranTrajectoryOptimizationTSRBM COMMAND DirtranTrajectoryOptimizationTSRBM)
+add_matlab_test(NAME examples/CS284_Final_Project/runHitBall COMMAND runHitBall)

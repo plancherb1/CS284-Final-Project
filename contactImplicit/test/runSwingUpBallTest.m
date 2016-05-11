@@ -3,8 +3,8 @@ function runSwingUpBallTest()
     options.view = 'right';
     terrainHeight = -2.1;
     options.terrain = RigidBodyFlatTerrain(terrainHeight);
-    plant = PlanarRigidBodyManipulator('../urdf/TestPlant.urdf',options);
-    plant = plant.addRobotFromURDF('../urdf/PlanarManipulatorBrick.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
+    plant = PlanarRigidBodyManipulator('../urdf/TestPlantBoxHand.urdf',options);
+    plant = plant.addRobotFromURDF('../urdf/brick.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
     plant = plant.setInputLimits(-40,40);
     plant = plant.compile();
     % construct the visualizer
@@ -119,8 +119,5 @@ function runSwingUpBallTest()
     % playback the trajectory
     %v.playback(xtraj,struct('slider',true));
     v.playbackAVI(xtraj,'~/Desktop/ballTest.avi');
-    % for simulation need to wrap the plant in a TimeStepping to get contacts
-    % plant = TimeSteppingRigidBodyManipulator(plant,.001,options);
-    % to get dynamics at a point use the manipulatorDynamics
-    % [H,C,B] = plant.manipulatorDynamics(q,qd);
+
 end

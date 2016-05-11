@@ -1,6 +1,6 @@
 function [p,xtraj,utraj,v,x0] = runCatch
-    p = PlanarRigidBodyManipulator('PlanarManipulator.urdf');
-    p = p.addRobotFromURDF('../../systems/plants/test/ball.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
+    p = PlanarRigidBodyManipulator('../urdf/PlanarManipulator.urdf');
+    p = p.addRobotFromURDF('../urdf/ball.urdf',zeros(3,1),zeros(3,1),struct('floating',true));
     p = p.setInputLimits(-40,40);
 
     N = 31;
