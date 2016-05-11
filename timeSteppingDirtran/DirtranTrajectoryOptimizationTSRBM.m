@@ -104,6 +104,7 @@ classdef DirtranTrajectoryOptimizationTSRBM < DirectTrajectoryOptimization
   methods (Access=protected)
     function [f,df] = forward_constraint_fun(obj,h,x0,x1,u)
       %{
+      % original PRBM code
       nX = obj.plant.getNumStates();
       [xdot,dxdot] = obj.plant.dynamics(0,x0,u);
       f = x1 - x0 - h*xdot;
@@ -123,9 +124,13 @@ classdef DirtranTrajectoryOptimizationTSRBM < DirectTrajectoryOptimization
       %{%}
       % now wrap it in a time stepping rigid body manipulator to include
       % contacts in the model and set input limits and run iterations to
-      % solve across that time dynamic
-      steps = 25;
-      dt = h/steps;
+      % solve across that time dynamic and make sure to check for TaylorVar
+      steps = 25; % Pick value
+      if isa(h,'TaylorVar')
+         dt = double(h)/steps;
+      else
+        dt = h/steps;
+      end
       options.view = 'right';
       options.multiple_contacts = true;
       TSRBM = TimeSteppingRigidBodyManipulator(obj.plant,dt,options);

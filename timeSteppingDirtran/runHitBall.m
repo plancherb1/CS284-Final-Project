@@ -18,7 +18,7 @@ function runHitBall()
     tmin = 0.5;
     tmax = 1.5;
     tf0 = (tmin+tmax)/2;
-    N = 100;
+    N = 250;
     
     % initialize the trajectory
     [x0,xf,traj_init.x] = initTraj(tf0,N);

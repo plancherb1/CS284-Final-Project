@@ -31,12 +31,15 @@ function [f,df] = dirtranConditionTSRBM(TSRBM,method,x0,x1,u0,options)
         case 4 % Iterated Forward Euler
             xc = x0;
             for attempts=1:steps
-                [xk, xkdot] = nextState(TSRBM,xc,u0,nX);
+                [xk, xkdot, penaltyFlag] = nextState(TSRBM,xc,u0,nX);
                 if attempts == 1
                     df = [-(xk - xc)/dt -xkdot(:,2:1+nX) eye(nX) -xkdot(:,nX+2:end)];
                 else
                     df(:,2:1+nX) = df(:,2:1+nX) + -xkdot(:,2:1+nX);
                     df(:,end-size(-xkdot(:,nX+2:end),2)+1:end) = df(:,end-size(-xkdot(:,nX+2:end),2)+1:end) +  -xkdot(:,nX+2:end);
+                end
+                if penaltyFlag
+                    break;
                 end
                 xc = xk;
             end
@@ -51,11 +54,13 @@ function [f,df] = dirtranConditionTSRBM(TSRBM,method,x0,x1,u0,options)
 end
 
 % include penalty state if the update fails
-function [xk, xkdot] = nextState(TSRBM,x,u,nX)
+function [xk, xkdot, flag] = nextState(TSRBM,x,u,nX)
     try
         [xk, xkdot] = TSRBM.update(0,x,u);
+        flag = 0;
     catch
         xk = 1000*rand(nX,1);
         xkdot = [zeros(nX,1) 1000*diag(rand(1,nX)) [zeros(nX/2,2);1000*rand(nX/2,2)]];
+        flag = 1;
     end
 end
